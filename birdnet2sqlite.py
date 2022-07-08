@@ -45,6 +45,13 @@ def convert_offsets(dt, parsed):
         del item["Begin Time (s)"]
         del item["End Time (s)"]
         yield item
+        
+        
+def get_location(parsed, filename):
+    for item in parsed:
+        location = filename.split("/")[-2]
+        item["location"] = location
+        yield item
 
 
 def main(database_path, recreate, results):
@@ -54,7 +61,8 @@ def main(database_path, recreate, results):
             parsed = autocast(parse_tsv(tsv))
             dt = filename_to_datetime(result)
             improved = convert_offsets(dt, parsed)
-            db["birdnet"].insert_all(improved)
+            improved_with_location = get_location(improved, result)
+            db["birdnet"].insert_all(improved_with_location)
 
 
 if __name__ == "__main__":
