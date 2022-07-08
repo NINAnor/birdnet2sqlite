@@ -35,4 +35,10 @@ library(DBI)
 setwd("path/to/working/directory")
 sqlite <- dbDriver("SQLite")
 conn <- dbConnect(sqlite, "my_database.sqlite")
+
+# For the full dataset
+data <- dbReadTable(conn, "birdnet")
+
+# For a subset of the dataset 
+res <- dbSendQuery(con, "SELECT * FROM birdnet WHERE location = X")
 ```
