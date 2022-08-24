@@ -5,11 +5,12 @@ import ast
 import csv
 import datetime
 import re
+import os
+import pandas as pd
 
 import sqlite_utils
 
-recorder_filename_date = re.compile(r"\d{8}_\d{6}")
-
+recorder_filename_date = re.compile(r"\d{8}_\d{6}.BirdNET.selection.table.txt")
 
 def parse_tsv(fp):
     return csv.DictReader(fp, delimiter="\t")
@@ -52,18 +53,30 @@ def get_location(parsed, filename):
         location = filename.split("/")[-2]
         item["location"] = location
         yield item
+        
+def add_prefix(parsed, filename):
+    for item in parsed:
+        prefix = filepath.split('/')[-1].split('_')[0]
+        item["prefix"] = prefix
+        yield item
 
+def main(database_path, recreate, results, prefix):
 
-def main(database_path, recreate, results):
     db = sqlite_utils.Database(database_path, recreate=recreate)
+    
     for result in results:
+    
         with open(result) as tsv:
             parsed = autocast(parse_tsv(tsv))
             dt = filename_to_datetime(result)
             improved = convert_offsets(dt, parsed)
-            improved_with_location = get_location(improved, result)
-            db["birdnet"].insert_all(improved_with_location)
-
+            
+            if prefix:
+                improved = add_prefix(improved, result)
+                
+            improved = get_location(improved, result)
+       
+            db["birdnet"].insert_all(improved)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -74,6 +87,11 @@ if __name__ == "__main__":
         "--database_path",
         help="Path of the database to create or update",
         default="common.sqlite",
+    )
+    parser.add_argument(
+        "--prefix",
+        help="Does the file name has a prefix before HMS_YMD",
+        default=False,
     )
     parser.add_argument(
         "--recreate",
@@ -87,4 +105,4 @@ if __name__ == "__main__":
         help="BirdNet result file",
     )
     args = parser.parse_args()
-    main(args.database_path, args.recreate, args.results)
+    main(args.database_path, args.recreate, args.results, args.prefix)
