@@ -2,40 +2,25 @@
 
 import argparse
 import ast
-import csv
 import datetime
 import re
-import os
-import pandas as pd
 
 import sqlite_utils
 
+from utils import parse_tsv, autocast
+from preprocess_birdnet_result import add_info
+
 recorder_filename_date = re.compile(r"\d{8}_\d{6}.BirdNET.selection.table.txt")
-
-def parse_tsv(fp):
-    return csv.DictReader(fp, delimiter="\t")
-
-
-def autocast(obj):
-    for row in obj:
-        for key, value in row.items():
-            try:
-                row[key] = ast.literal_eval(value)
-            except (SyntaxError, ValueError):
-                pass
-        yield row
-
 
 def filename_to_datetime(filename):
     matches = recorder_filename_date.search(filename)
     if not matches:
         return  # Invalid filename
     try:
-        dt = datetime.datetime.strptime(matches.group(0), "%Y%m%d_%H%M%S")
+        dt = datetime.datetime.strptime(matches.group(0), "%Y%m%d_%H%M%S.BirdNET.selection.table.txt")
     except ValueError:
         return  # Wrong format
     return dt
-
 
 def convert_offsets(dt, parsed):
     for item in parsed:
@@ -47,20 +32,7 @@ def convert_offsets(dt, parsed):
         del item["End Time (s)"]
         yield item
         
-        
-def get_location(parsed, filename):
-    for item in parsed:
-        location = filename.split("/")[-2]
-        item["location"] = location
-        yield item
-        
-def add_prefix(parsed, filename):
-    for item in parsed:
-        prefix = filepath.split('/')[-1].split('_')[0]
-        item["prefix"] = prefix
-        yield item
-
-def main(database_path, recreate, results, prefix):
+def main(database_path, recreate, results, prefix, index_location_folder):
 
     db = sqlite_utils.Database(database_path, recreate=recreate)
     
@@ -70,12 +42,7 @@ def main(database_path, recreate, results, prefix):
             parsed = autocast(parse_tsv(tsv))
             dt = filename_to_datetime(result)
             improved = convert_offsets(dt, parsed)
-            
-            if prefix:
-                improved = add_prefix(improved, result)
-                
-            improved = get_location(improved, result)
-       
+            improved = add_info(result, parsed, prefix, index_location_folder)
             db["birdnet"].insert_all(improved)
 
 if __name__ == "__main__":
@@ -94,6 +61,12 @@ if __name__ == "__main__":
         default=False,
     )
     parser.add_argument(
+        "--index_location_folder",
+        help="Does the file name has a prefix before HMS_YMD",
+        default=-1,
+        type=int
+    )
+    parser.add_argument(
         "--recreate",
         help="Recreate the database",
         action=argparse.BooleanOptionalAction,
@@ -105,4 +78,4 @@ if __name__ == "__main__":
         help="BirdNet result file",
     )
     args = parser.parse_args()
-    main(args.database_path, args.recreate, args.results, args.prefix)
+    main(args.database_path, args.recreate, args.results, args.prefix, args.index_location_folder)
