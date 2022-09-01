@@ -13,8 +13,8 @@ For more flexibility with the script
 ```
 #!/bin/bash
 
-BASE_FOLDER=XXX
-OUT_FOLDER=XXX
+BASE_FOLDER=$1
+OUT_FOLDER=$2
 
 docker run --rm \
     -v $BASE_FOLDER:$BASE_FOLDER \
