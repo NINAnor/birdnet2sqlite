@@ -10,8 +10,6 @@ import sqlite_utils
 from utils import parse_tsv, autocast
 from preprocess_birdnet_result import add_info
 
-recorder_filename_date = re.compile(r"\d{8}_\d{6}.BirdNET.selection.table.txt")
-
 def filename_to_datetime(filename):
     matches = recorder_filename_date.search(filename)
     if not matches:
