@@ -10,12 +10,14 @@ import sqlite_utils
 from utils import parse_tsv, autocast
 from preprocess_birdnet_result import add_info
 
+recorder_filename_date = re.compile(r"\d{8}_\d{6}.BirdNET.selection.table.txt$")
+
 def filename_to_datetime(filename):
     matches = recorder_filename_date.search(filename)
     if not matches:
         return  # Invalid filename
     try:
-        dt = datetime.datetime.strptime(matches.group(0), "%Y%m%d_%H%M%S.BirdNET.selection.table.txt")
+        dt = datetime.datetime.strptime(matches.group(0), recorder_filename_date)
     except ValueError:
         return  # Wrong format
     return dt
