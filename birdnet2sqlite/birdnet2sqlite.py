@@ -10,14 +10,14 @@ import sqlite_utils
 from utils import parse_tsv, autocast
 from preprocess_birdnet_result import add_info
 
-recorder_filename_date = re.compile(r"\d{8}_\d{6}.BirdNET.selection.table.txt$")
+recorder_filename_date = re.compile(r"\d{8}_\d{6}.BirdNET.selection.table.txt")
 
 def filename_to_datetime(filename):
     matches = recorder_filename_date.search(filename)
     if not matches:
         return  # Invalid filename
     try:
-        dt = datetime.datetime.strptime(matches.group(0), recorder_filename_date)
+        dt = datetime.datetime.strptime(matches.group(0), "%Y%m%d_%H%M%S.BirdNET.selection.table.txt")
     except ValueError:
         return  # Wrong format
     return dt
@@ -35,9 +35,8 @@ def convert_offsets(dt, parsed):
 def main(database_path, recreate, results, prefix, index_location_folder):
 
     db = sqlite_utils.Database(database_path, recreate=recreate)
-    
+
     for result in results:
-    
         with open(result) as tsv:
             parsed = autocast(parse_tsv(tsv))
             dt = filename_to_datetime(result)
@@ -78,4 +77,4 @@ if __name__ == "__main__":
         help="BirdNet result file",
     )
     args = parser.parse_args()
-    main(args.database_path, args.recreate, args.prefix, args.index_location_folder, args.results)
+    main(args.database_path, args.recreate, args.results, args.prefix, args.index_location_folder)
