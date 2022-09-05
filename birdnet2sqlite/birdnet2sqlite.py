@@ -78,4 +78,4 @@ if __name__ == "__main__":
         help="BirdNet result file",
     )
     args = parser.parse_args()
-    main(args.database_path, args.recreate, args.results, args.prefix, args.index_location_folder)
+    main(args.database_path, args.recreate, args.prefix, args.index_location_folder, args.results)
