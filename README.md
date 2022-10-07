@@ -39,3 +39,5 @@ data <- dbReadTable(conn, "birdnet")
 # For a subset of the dataset 
 res <- dbSendQuery(con, "SELECT * FROM birdnet WHERE location = X")
 ```
+
+

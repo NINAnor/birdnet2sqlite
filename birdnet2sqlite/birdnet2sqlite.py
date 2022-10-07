@@ -21,16 +21,6 @@ def filename_to_datetime(filename):
     except ValueError:
         return  # Wrong format
     return dt
-
-def convert_offsets(dt, parsed):
-    for item in parsed:
-        begin_offset = datetime.timedelta(seconds=item["Begin Time (s)"])
-        end_offset = datetime.timedelta(seconds=item["End Time (s)"])
-        item["Begin Time"] = dt + begin_offset
-        item["End Time"] = dt + end_offset
-        del item["Begin Time (s)"]
-        del item["End Time (s)"]
-        yield item
         
 def main(database_path, recreate, results, prefix, index_location_folder):
 
@@ -40,8 +30,8 @@ def main(database_path, recreate, results, prefix, index_location_folder):
         with open(result) as tsv:
             parsed = autocast(parse_tsv(tsv))
             dt = filename_to_datetime(result)
-            improved = convert_offsets(dt, parsed)
-            improved = add_info(result, parsed, prefix, index_location_folder)
+            #improved = convert_offsets(dt, parsed)
+            improved = add_info(result, parsed, prefix, index_location_folder, dt)
             db["birdnet"].insert_all(improved)
 
 if __name__ == "__main__":

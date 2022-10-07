@@ -8,6 +8,8 @@ OUT_FOLDER=$(dirname $DB_NAME)
 IS_PREFIX=$3
 INDEX_LOCATION_FOLDER=$4
 
+echo $OUT_FOLDER
+
 docker run --rm \
     -v $BASE_FOLDER:$BASE_FOLDER \
     -v $OUT_FOLDER:$OUT_FOLDER \
