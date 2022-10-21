@@ -27,12 +27,15 @@ def main(database_path, recreate, results, prefix, index_location_folder):
     db = sqlite_utils.Database(database_path, recreate=recreate)
 
     for result in results:
-        with open(result) as tsv:
-            parsed = autocast(parse_tsv(tsv))
-            dt = filename_to_datetime(result)
-            #improved = convert_offsets(dt, parsed)
-            improved = add_info(result, parsed, prefix, index_location_folder, dt)
-            db["birdnet"].insert_all(improved)
+        try:
+            with open(result) as tsv:
+                parsed = autocast(parse_tsv(tsv))
+                dt = filename_to_datetime(result)
+                #improved = convert_offsets(dt, parsed)
+                improved = add_info(result, parsed, prefix, index_location_folder, dt)
+                db["birdnet"].insert_all(improved)
+        except:
+            print(f"Failed to parse {result}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
