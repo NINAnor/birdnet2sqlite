@@ -33,7 +33,6 @@ def main(database_path, recreate, results, prefix, index_location_folder):
     db = sqlite_utils.Database(database_path, recreate=recreate)
 
     for result in results:
-        print(result)
         dt = filename_to_datetime(result)
         with open(result) as tsv:
             parsed = autocast(parse_tsv(tsv))
