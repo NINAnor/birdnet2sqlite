@@ -2,6 +2,7 @@
 
 import argparse
 import datetime
+import pandas
 import re
 
 import sqlite_utils
@@ -28,16 +29,30 @@ def filename_to_datetime(filename):
         dt = datetime.datetime.strptime(matches.group(0), "%Y-%m-%d_%H%M%S.BirdNET.selection.table.txt")
     return dt
         
-def main(database_path, recreate, results, prefix, index_location_folder):
+def parse_species_list(species_list_file):
+    data=pd.read_csv(species_list_file, header=None)
+    data_split=data[0].str.split(pat="_",expand=True)
+    data_list=data_split[0].values.tolist()
+    return data_list
+    
+def read_translating_file(language):
+    filename = "./labels/V2.3/BirdNET_GLOBAL_3K_V2.3_Labels_{}.txt".format(language)
+    df = pd.read_csv(filename, header=None)
+    return df
+
+def main(database_path, recreate, results, prefix, index_location_folder, species_list_file):
 
     db = sqlite_utils.Database(database_path, recreate=recreate)
 
     for result in results:
-        dt = filename_to_datetime(result)
-        with open(result) as tsv:
-            parsed = autocast(parse_tsv(tsv))
-            improved = add_info(result, parsed, prefix, index_location_folder, dt)
-            db["birdnet"].insert_all(improved)
+        try:
+            dt = filename_to_datetime(result)
+            with open(result) as tsv:
+                parsed = autocast(parse_tsv(tsv))
+                improved = add_info(result, parsed, prefix, index_location_folder, dt, species_list_file)
+                db["birdnet"].insert_all(improved)
+        except:
+            print(f"problem processing {result}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -61,6 +76,18 @@ if __name__ == "__main__":
         type=int
     )
     parser.add_argument(
+        "--species_list_file",
+        help="Path to a file containing the species of interest",
+        default="None",
+        type=str
+    )
+    parser.add_argument(
+        "--language",
+        help="Translating the species names in the language of interest",
+        default="None",
+        type=str
+    )
+    parser.add_argument(
         "--recreate",
         help="Recreate the database",
         action=argparse.BooleanOptionalAction,
@@ -72,4 +99,23 @@ if __name__ == "__main__":
         help="BirdNet result file",
     )
     args = parser.parse_args()
-    main(args.database_path, args.recreate, args.results, args.prefix, args.index_location_folder)
+    
+    if args.species_list_file is not "None":
+        print("Loading the species list {}".format(args.species_list_file))
+        species_list = parse_species_list(args.species_list_file)
+    else:
+        species_list = "None"
+        
+    if args.language is not "None":
+        print("Loading the {} translation file".format(args.language))
+        translation_file = read_translating_file(args.language)
+    else:
+        translation_file = "None"
+    
+    main(args.database_path, 
+        args.recreate, 
+        args.results, 
+        args.prefix, 
+        args.index_location_folder, 
+        species_list, 
+        translation_file)

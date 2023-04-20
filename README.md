@@ -36,8 +36,6 @@ conn <- dbConnect(sqlite, "my_database.sqlite")
 # For the full dataset
 data <- dbReadTable(conn, "birdnet")
 
-# For a subset of the dataset 
+# For a subset of the dataset
 res <- dbSendQuery(con, "SELECT * FROM birdnet WHERE location = X")
 ```
-
-
