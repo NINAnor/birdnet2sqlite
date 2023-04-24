@@ -32,7 +32,7 @@ def add_time_detection(item, dt):
     return item
     
 def filter_species(item, species_list):
-    if item["Species Code"] in species_list:
+    if item["Common Name"] in species_list:
         item["in_custom_list"] = True
     else:
         item["in_custom_list"] = False
@@ -42,7 +42,14 @@ def translate_common_name(item, translation_file):
     matching_rows = translation_file.loc[translation_file["SPECIES_CODE"] == item["Species Code"], "Common Name"]
     if not matching_rows.empty:
         translated_name = matching_rows.iloc[0]
-        item["Translated Common Name"] = translated_name if not pd.isna(translated_name) else item["Common name"]
+        item["Translated Common Name"] = translated_name if not pd.isna(translated_name) else item["Common Name"]
+    return item
+
+def add_latin_name(item, translation_file):
+    matching_rows = translation_file.loc[translation_file["SPECIES_CODE"] == item["Species Code"], "SCI_NAME"]
+    if not matching_rows.empty:
+        scientific_name = matching_rows.iloc[0]
+        item["Scientific name"] = scientific_name if not pd.isna(scientific_name) else item[" "]
     return item
     
 def add_info(filename, parsed, prefix, index_location_folder, dt, species_list_file, translation_file):
@@ -62,6 +69,8 @@ def add_info(filename, parsed, prefix, index_location_folder, dt, species_list_f
 
         if translation_file is not None:
             improved=translate_common_name(item, translation_file)
+            improved=add_latin_name(item, translation_file)
+
         yield improved
         
 

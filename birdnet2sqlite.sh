@@ -11,15 +11,18 @@ SPECIES_LIST_FILE=$5
 LANGUAGE=$6
 
 
-
+# If blanks in the file path: FILES=readarray -d '' FILES < <(find "$BASE_FOLDER" -type f -name '*.txt' -print0)
 FILES=($(find "$BASE_FOLDER" -type f -name '*.txt'))
 
 # Batch size
-BATCH_SIZE=5
+BATCH_SIZE=100
 
 # Loop over the files in batches
 for (( i=0; i<${#FILES[@]}; i+=BATCH_SIZE )); do
     BATCH_FILES=("${FILES[@]:i:BATCH_SIZE}")
+
+    # Join the batch files into a single string with spaces as separator
+    BATCH_FILES_STRING=$(printf ' %q' "${BATCH_FILES[@]}")
 
     docker run --rm \
         -v "$BASE_FOLDER":"$BASE_FOLDER" \
@@ -32,7 +35,7 @@ for (( i=0; i<${#FILES[@]}; i+=BATCH_SIZE )); do
         --index_location_folder "$INDEX_LOCATION_FOLDER" \
         --species_list_file "$SPECIES_LIST_FILE" \
         --language "$LANGUAGE" \
-        --results "${BATCH_FILES[@]}"
+        --results "$BATCH_FILES_STRING"
 done
 
 
