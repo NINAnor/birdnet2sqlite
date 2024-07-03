@@ -7,8 +7,6 @@ DB_NAME=$2
 OUT_FOLDER=$(dirname $DB_NAME)
 IS_PREFIX=$3
 INDEX_LOCATION_FOLDER=$4
-SPECIES_LIST_FILE=$5
-LANGUAGE=$6
 
 
 # If blanks in the file path: FILES=readarray -d '' FILES < <(find "$BASE_FOLDER" -type f -name '*.txt' -print0)
@@ -24,17 +22,10 @@ for (( i=0; i<${#FILES[@]}; i+=BATCH_SIZE )); do
     # Join the batch files into a single string with spaces as separator
     BATCH_FILES_STRING=$(printf ' %q' "${BATCH_FILES[@]}")
 
-    docker run --rm \
-        -v "$BASE_FOLDER":"$BASE_FOLDER" \
-        -v "$OUT_FOLDER":"$OUT_FOLDER" \
-        --workdir "$BASE_FOLDER" \
-        birdnet2sqlite \
-        /src/birdnet2sqlite.py \
+    poetry run python ./src/birdnet2sqlite.py \
         --database_path "$DB_NAME" \
         --prefix "$IS_PREFIX" \
         --index_location_folder "$INDEX_LOCATION_FOLDER" \
-        --species_list_file "$SPECIES_LIST_FILE" \
-        --language "$LANGUAGE" \
         --results "$BATCH_FILES_STRING"
 done
 

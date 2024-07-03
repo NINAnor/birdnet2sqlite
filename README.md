@@ -3,10 +3,10 @@ It expects to find a YYYYmmdd_HHMMSS string in the filename.
 
 # How to build and run locally (with Docker)
 
-### Build the docker image
+### Install the poetry environment
 
 ```
-docker build -t birdnet2sqlite -f Dockerfile .
+poetry install
 ```
 
 ### Run `birdnet2sqlite.sh`
