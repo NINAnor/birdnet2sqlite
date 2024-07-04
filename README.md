@@ -1,7 +1,6 @@
-Converts a bunch of TSV files produced by BirdNet to a SQLite database.
-It expects to find a YYYYmmdd_HHMMSS string in the filename.
+# birdnet2sqlite: convert birdnet results to `.sqlite` database
 
-# How to build and run locally (with Docker)
+## How to use it
 
 ### Install the poetry environment
 

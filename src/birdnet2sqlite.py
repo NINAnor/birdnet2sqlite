@@ -42,11 +42,16 @@ def filename_to_datetime(filename):
         dt = datetime.datetime.strptime(
             matches.group(0), "%Y%m%d.BirdNET.selection.table.txt"
         )
-    elif re.search(r"\d{4}-\d{2}-\d{2}_\d{6}.BirdNET.selection.table.txt", matches.group(0)):
+    elif re.search(
+        r"\d{4}-\d{2}-\d{2}_\d{6}.BirdNET.selection.table.txt", matches.group(0)
+    ):
         dt = datetime.datetime.strptime(
             matches.group(0), "%Y-%m-%d_%H%M%S.BirdNET.selection.table.txt"
         )
-    elif re.search(r"\d{4}-\d{2}-\d{2}T\d{2}_\d{2}_\d{2}\.\d{3}Z\.BirdNET\.selection\.table\.txt", matches.group(0)):
+    elif re.search(
+        r"\d{4}-\d{2}-\d{2}T\d{2}_\d{2}_\d{2}\.\d{3}Z\.BirdNET\.selection\.table\.txt",
+        matches.group(0),
+    ):
         dt = datetime.datetime.strptime(
             matches.group(0), "%Y-%m-%dT%H_%M_%S.%fZ.BirdNET.selection.table.txt"
         )
