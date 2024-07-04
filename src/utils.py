@@ -1,8 +1,10 @@
 import ast
 import csv
 
+
 def parse_tsv(fp):
     return csv.DictReader(fp, delimiter="\t")
+
 
 def autocast(obj):
     for row in obj:
